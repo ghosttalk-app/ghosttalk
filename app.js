@@ -16,20 +16,55 @@ const db = firebase.database();
 
 let username = "";
 
-// Anonymous login
-auth.signInAnonymously()
-  .then(() => {
-    // Generate random username
-    username = "Guest" + Math.floor(Math.random() * 10000);
-    document.getElementById("status").textContent = "You are: " + username;
-  })
-  .catch(error => {
-    console.error(error);
-    document.getElementById("status").textContent = "Failed to login";
-  });
+// ----------------------------
+// Email/password login form
+// ----------------------------
+const loginFormHTML = `
+  <div id="loginForm">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="signupBtn">Sign Up</button>
+    <button id="loginBtn">Log In</button>
+  </div>
+`;
 
-// Send message
+document.getElementById("app").insertAdjacentHTML("afterbegin", loginFormHTML);
+
+// Signup
+document.getElementById("signupBtn").addEventListener("click", () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if (!email || !password) return alert("Enter email and password");
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      username = email.split("@")[0]; // simple username
+      document.getElementById("status").textContent = "Logged in as: " + username;
+      document.getElementById("loginForm").remove();
+    })
+    .catch(err => alert(err.message));
+});
+
+// Login
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if (!email || !password) return alert("Enter email and password");
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      username = email.split("@")[0];
+      document.getElementById("status").textContent = "Logged in as: " + username;
+      document.getElementById("loginForm").remove();
+    })
+    .catch(err => alert(err.message));
+});
+
+// ----------------------------
+// Send message (after login)
+// ----------------------------
 document.getElementById("sendBtn").addEventListener("click", () => {
+  if (!username) return alert("You must log in first");
   const input = document.getElementById("messageInput");
   const msg = input.value.trim();
   if (!msg) return;
@@ -43,7 +78,9 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   input.value = "";
 });
 
+// ----------------------------
 // Listen for messages globally
+// ----------------------------
 db.ref("messages").on("child_added", snapshot => {
   const data = snapshot.val();
   const messages = document.getElementById("messages");
