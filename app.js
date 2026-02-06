@@ -16,21 +16,16 @@ const db = firebase.database();
 
 let username = "";
 
-// ----------------------------
-// Email/password login form
-// ----------------------------
-const loginFormHTML = `
-  <div id="loginForm">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Log In</button>
-  </div>
-`;
+// DOM Elements
+const loginContainer = document.getElementById("loginContainer");
+const chatContainer = document.getElementById("chatContainer");
+const status = document.getElementById("status");
+const messagesDiv = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
 
-document.getElementById("app").insertAdjacentHTML("afterbegin", loginFormHTML);
-
-// Signup
+// ----------------------------
+// Sign up
+// ----------------------------
 document.getElementById("signupBtn").addEventListener("click", () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -38,14 +33,15 @@ document.getElementById("signupBtn").addEventListener("click", () => {
 
   auth.createUserWithEmailAndPassword(email, password)
     .then(userCredential => {
-      username = email.split("@")[0]; // simple username
-      document.getElementById("status").textContent = "Logged in as: " + username;
-      document.getElementById("loginForm").remove();
+      username = email.split("@")[0];
+      showChat();
     })
     .catch(err => alert(err.message));
 });
 
+// ----------------------------
 // Login
+// ----------------------------
 document.getElementById("loginBtn").addEventListener("click", () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -54,19 +50,25 @@ document.getElementById("loginBtn").addEventListener("click", () => {
   auth.signInWithEmailAndPassword(email, password)
     .then(userCredential => {
       username = email.split("@")[0];
-      document.getElementById("status").textContent = "Logged in as: " + username;
-      document.getElementById("loginForm").remove();
+      showChat();
     })
     .catch(err => alert(err.message));
 });
 
 // ----------------------------
-// Send message (after login)
+// Show chat after login
+// ----------------------------
+function showChat() {
+  loginContainer.style.display = "none";
+  chatContainer.style.display = "block";
+  status.textContent = "Logged in as: " + username;
+}
+
+// ----------------------------
+// Send message
 // ----------------------------
 document.getElementById("sendBtn").addEventListener("click", () => {
-  if (!username) return alert("You must log in first");
-  const input = document.getElementById("messageInput");
-  const msg = input.value.trim();
+  const msg = messageInput.value.trim();
   if (!msg) return;
 
   db.ref("messages").push({
@@ -75,7 +77,7 @@ document.getElementById("sendBtn").addEventListener("click", () => {
     timestamp: Date.now()
   });
 
-  input.value = "";
+  messageInput.value = "";
 });
 
 // ----------------------------
@@ -83,9 +85,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
 // ----------------------------
 db.ref("messages").on("child_added", snapshot => {
   const data = snapshot.val();
-  const messages = document.getElementById("messages");
   const div = document.createElement("div");
   div.textContent = data.user + ": " + data.text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
