@@ -10,11 +10,19 @@
 
   <div id="app">
     <h1>GhostTalk</h1>
-    <p id="status">Connecting anonymously...</p>
 
-    <div id="chat">
+    <!-- Login/Sign-up Form -->
+    <div id="loginContainer">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="signupBtn">Sign Up</button>
+      <button id="loginBtn">Log In</button>
+    </div>
+
+    <!-- Chat UI (hidden until login) -->
+    <div id="chatContainer" style="display:none;">
+      <p id="status"></p>
       <div id="messages"></div>
-
       <input id="messageInput" type="text" placeholder="Type a message..." />
       <button id="sendBtn">Send</button>
     </div>
@@ -25,7 +33,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- Your JS -->
+  <!-- App JS -->
   <script src="app.js"></script>
 </body>
 </html>
